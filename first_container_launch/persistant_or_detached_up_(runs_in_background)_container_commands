@@ -1,0 +1,30 @@
+
+
+
+# restart always when container stopped for any reason
+$ docker run -dt --restart always
+
+
+# restart when container stopped unexpected reason
+$ docker run -dt --restart unless-stopped
+
+
+# restart when container stopped on-failure
+$ docker run -dt --restart on-failure
+
+# doesn't restart --- default
+$ docker run -dt --restart no
+
+
+## Running 
+$ docker run -dt --restart always --name bg-container alpine
+
+@output: #contaier ID
+ab11117b7bcd4f12e5d2d48b0e1922ade833e23a299ca9065c7fac8c6ab48b6f
+
+
+
+### test throwaway container - that immediately goes away - # below container wont be seen in container list $ docker container ls -a
+$ docker run -it --name rm-test --rm alpine
+
+
