@@ -1,0 +1,4 @@
+$ docker container ls
+
+# check all containers which are stopped or exited as well
+$ docker container ls -a
