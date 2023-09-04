@@ -1,0 +1,24 @@
+Using Docker Hub
+
+If we want to share our Docker images with the world (or just our coworkers), we can create a Docker repository on the Docker Hub found at hub.docker.com (https://hub.docker.com/). Log in or create an account with a username, password, and associated email.
+
+Once logged in, select Repositories, then click the Create Repository button. Give your repo a name; I'll be using the name demo-app. Leave the repo public, and provide no build settings. Create the repo.
+
+From here, we'll want to switch to the command line. To upload our image to the Docker Hub, we'll need to log in from the command line.
+
+docker login --username=<username>
+Input the password when prompted.
+
+Before we can push directly to our repo, however, we need to tag our image with the name of our repository in a <username>/<reponame> format. This is done via docker tag.
+
+docker tag appimage <username>/demo-app:latest
+We can now use the docker push command to share it.
+
+docker push <username>/demo-app
+If we return to our repo in our browser and refresh, then select Tags, we can see the history of our image and share various versions as needed.
+
+Wrap-Up
+Use the Docker Hub to host images.
+docker login --username=<username>: Log in to your Docker account on the CLI.
+docker tag <image> <username>/<reponame>: Tag the image with the repo name.
+docker push <username>/<reponame>: Push the image to Docker Hub.
