@@ -1,0 +1,96 @@
+Building a Dockerfile
+
+Now that we know what images are made of, let's make one ourselves via Dockerfile. For this, we're going to dockerize a Node.js application.
+
+Let's grab our app:
+
+cd
+wget --content-disposition 'https://github.com/linuxacademy/content-Introduction-to-Containers-and-Docker/raw/master/lessonfiles/demo-app.tar'
+tar -xf demo-app.tar
+cd app/
+We need our Dockerfile to have the following layers:
+
+Based on the Node.JS 10 Alpine image (node:10-alpine)
+Creates the /home/node/app/node_modules directory and sets node as the owner and group
+Sets the working directory as /home/node/app
+Copies app package* files to the working directory
+Sets the NPM registry
+The installs are prerequisite NPM packages
+Copies the rest of the app/ data to the working directory and sets the owner and group of the working directory to node
+Switches to the node user
+Opens port 8080 to be used
+Runs the application
+So let's create our Dockerfile and start.
+
+vim Dockerfile
+Dockerfiles are built using instructions which are just set keywords that perform certain actions. We saw three in the previous lesson: FROM, COPY, and CMD. Instruction keywords do not have to be written in all caps, but it is preferred.
+
+We first need to define our parent image with FROM; all valid Dockerfiles must begin with FROM.
+
+FROM node:10-alpine
+We now want to create a directory and set its owner. For this, we can use the RUN command, which lets us execute any commands against the shell. Our image is based on Alpine, which uses the ash shell, so our command will be mkdir -p /home/node/app/node_modules && chown -R node:node /home/node/app. All we have to do is feed that into the RUN instruction.
+
+RUN mkdir -p /home/node/app/node_modules && chown -R node:node /home/node/app
+Next, we need to move into the /home/node/app directory. We do this by setting a working directory with WORKDIR. Any RUN, CMD, COPY, ADD, and ENTRYPOINT instructions that follow will be performed in this directory:
+
+WORKDIR /home/node/app
+We now want to add our files. We have two options for this: COPY and ADD. ADD can pull files from outside URLs, and thus utilizes additional functionality. In other words, it's best to use COPY if you can, and since our package* files are all local, we can do so:
+
+COPY package*.json ./
+With the first argument being our source file(s) and the second our destination.
+
+We now need to ensure the prerequisite packages for our application are installed from NPM. These are just more RUN commands.
+
+RUN npm config set registry http://registry.npmjs.org/
+RUN npm install
+We can now copy over the rest of our application files using COPY. We'll also want to set the owner of our working directory to the node user and group. Since we're on Linux, this can also be achieved using some special COPY functionality.
+
+COPY --chown=node:node . .
+From here, we want to switch users. This works similarly to the previous WORKDIR command, but now we're switching users not directories for any following RUN, CMD, and ENTRYPOINT commands.
+
+USER node
+Our application is hosted on port 8080, so we also want to make sure that port is available on our container. For this, we'll use the EXPOSE keyword.
+
+EXPOSE 8080
+And now, finally, we want to provide the command (CMD) run as soon as the container is launched. Unlike RUN, CMD's preferred format doesn't take this as a shell command. Instead, the executable name should be supplied in an array, followed by any parameters: CMD ["executable","param1","param2"]. In our case, this will be:
+
+CMD [ "node", "index.js" ]
+Our final Dockerfile should look like:
+
+FROM node:10-alpine
+RUN mkdir -p /home/node/app/node_modules && chown -R node:node /home/node/app
+WORKDIR /home/node/app
+COPY package*.json ./
+RUN npm config set registry http://registry.npmjs.org/
+RUN npm install
+COPY --chown=node:node . .
+USER node
+EXPOSE 8080
+CMD [ "node", "index.js" ]
+Save and exit (:wq).
+
+We can now build our container using the docker build command and specifying the location of our Dockerfile. Since we're in the same directory, we can just denote this with a .. That said, we'll want to provide a name for our output image, so we'll want to use the -t flag to set a flag. If we're planning on adding this to the Docker Hub, we'll want to follow a <username>:<imagename> format for the tag. Since we aren't, we'll just give it the simple name of appimage.
+
+docker build . -t appimage
+We can now run our container.
+
+docker run -dt --name app01 appimage
+And see that our app is working.
+
+docker inspect app01 | grep IPAddress
+curl 172.17.0.2:8080
+Wrap-Up
+Dockerfiles are built using a series of instructions, dictated by set keywords:
+All Dockerfiles start with FROM.
+RUN runs commands on the shell.
+WORKDIR sets the working directory.
+COPY copies files.
+ADD also copies files, but can copy files from outside URLs.
+ADD uses more resources.
+We should use COPY when possible.
+USER sets the working user.
+EXPOSE exposes the container port.
+CMD is the final command in the Dockerfile and is the command run after the container is launched.
+See a full list of instructions. (https://docs.docker.com/engine/reference/builder/)
+docker build <dockerfile> builds the image.
+-t: Set a name; we should use <username>:<imagename> if using the Docker Hub.
