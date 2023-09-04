@@ -1,0 +1,29 @@
+Image Management
+
+Now that we've pulled down, run, and otherwise created a couple of images, we should take the time to learn how to manage them. Luckily for us, many of the commands for image management are similar to the commands we used to manage our containers themselves.
+
+Let's start with considering how images are used: images are pulled from their host repository and then cached on the local machine. When we perform a docker run, Docker will first look locally, then search the Docker Hub if it can't find an image. If we want to pull down an image from the Docker Hub before we run a docker run, we can use the docker pull command.
+
+docker pull alpine
+Notice how it tells us that our image is already up to date; we had pulled down the alpine image earlier in this course, after all.
+
+Should we want to see which images we have stored locally, we can run:
+
+docker image ls
+Notice we have our appimage, as well as the alpine, web-base, and hello-world images.
+
+Should we desire to remove any of these images, we can use docker image rm <container>, or, alternatively, pair docker image prune with the -a flag to remove all images not associated with a container. Lets do this:
+
+docker image prune -a
+Finally, we can review information about any of our images using docker image inspect.
+
+docker image inspect appimage
+Wrap-Up
+Images are managed similarly to containers (add image).
+docker pull <image>: Pulls down an image; this happens automatically when no image is available during docker run.
+docker image ls: Lists all Docker images.
+--no-trunc shows the full ID.
+docker image rm <image>: Removes an image.
+docker image prune: Removes all dangling images.
+-a: Removes all images not being used by a container.
+docker image inspect <image>: Displays image data.
